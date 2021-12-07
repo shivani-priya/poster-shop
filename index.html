@@ -11,30 +11,86 @@
     <link rel="stylesheet" type="text/css" href="/public/style.css">
 </head>
 <body>
-<div id="app">
+<div id="app" v-cloak>
+    <div id="loading">Loading...</div>
     <div class="header">
         <div class="container">
             <div class="title">
                 <img src="public/logo.png">
                 <h1>Vue.js Poster Shop</h1>
             </div>
+            <form class="search-bar" v-on:submit.prevent="onSubmit">
+                <input type="text"  placeholder="Search for Posters" required v-model="search">
+
+                <input type="submit"  value="Search" class="btn">
+                
+            </form>
+            <p>Try Search options <em>Cat,Dog & Flower </em></p>
         </div>
     </div>
     <div class="main container">
         <div class="products">
-            <p>Products go here.</p>
+            <div v-if="loading">Loading your results...</div>
+
+            <div v-else class="search-results">
+                Found {{results.length}} results for Search term {{lastSearch}}
+            </div>
+            
+            <!-- <button v-on:click="total += 9.90">Add to Cart</button> -->
+            <div v-for="product in products" class="product" v-bind:key="product.id">
+                <div>
+                    <div class="product-image">
+                        <img :src="product.thumb">
+                    </div>
+                </div>
+                    <div>
+                        <h4 class="product-title">
+                            {{product.title}}
+                        </h4>
+                        <p class="product-price"><strong>{{product.price | formatPrice}}</strong></p>
+                        <button v-on:click="addToCart(product)" class="add-to-cart btn">Add to Cart Again</button>
+
+                    </div>
+               
+            </div>
+
+            <div id="product-list-bottom">
+                <div v-if="products.length=== results.length && results.length>0">No more items left...</div>
+            </div>
         </div>
         <div class="cart">
             <h2>Shopping Cart</h2>
-            <div>
-                Total: $0.00
+            <div v-if="cart.length === 0" class="empty-cart">No items in the cart</div>
+            <!-- ul outside not req -->
+                <transition-group tag="ul" name="fade">
+                    <li v-for="item in cart" v-bind:key="item.id" class="cart-item">
+                        <!-- Telling Vue its a JS exp rather than string bind is used -->
+                        <div class="item-title" > {{item.title}}  </div>
+                        <span class="item-qty"> {{item.price | formatPrice}} x {{item.qty}} </span>
+                        <button class="btn" v-on:click="increment(item)">+</button>
+                        <button class="btn" v-on:click="decrement(item)">-</button>
+
+                    </li>
+                 </transition-group>
+            
+            <transition name="fade">
+            <div v-if="cart.length">
+                <!-- Evaluates when cart not emplty, returns truthy value -->
+               <div class="cart-total">Total: {{total | formatPrice}} </div> 
             </div>
+            </transition>
+            
+            <!-- Else condition trigerred -->
         </div>
     </div>
 </div>
 
 <!-- Scripts -->
 <script src="/reload/reload.js"></script>
+
+<script type="text/javascript" src="node_modules/vue/dist/vue.js"></script>
+<script type="text/javascript" src="node_modules/vue-resource/dist/vue-resource.js"></script>
+<script type="text/javascript" src="node_modules/scrollmonitor/scrollMonitor.js"></script>
 <script type="text/javascript" src="public/script.js"></script>
 
 </body>
